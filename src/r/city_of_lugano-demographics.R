@@ -1,4 +1,7 @@
-setwd('/Users/giovannikraushaar/Library/Mobile Documents/com~apple~CloudDocs/DataScience/Hackathon/usi_hackathon_data/data/city_of_lugano/demographics/')
+# giovanni.kraushaar@usi.ch
+
+homewd <- getwd()
+setwd('datasets/city_of_lugano/demographics/')
 
 library(fs)
 library(jsonlite)
@@ -34,4 +37,4 @@ for (k in filenames) {
   write.csv(d[[k]], file = str_replace(k, '.json', '.csv'), col.names = FALSE)
 }
 
-
+setwd(homewd)
