@@ -1,6 +1,12 @@
+#Paolo Montemurro, Marco Ferri USI Hackaton 16/11/2019
+# 6D
+
+library(shiny)
+library(leaflet)
+library(dplyr)
+library(leaflet.extras)
 
 data2       <- read.csv("data_last2.csv")
-
 time1 = seq(0,22,2)
 time2 = time1+1
 
