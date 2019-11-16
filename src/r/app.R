@@ -5,6 +5,13 @@ library(leaflet)
 library(dplyr)
 library(leaflet.extras)
 
+rsconnect::setAccountInfo(name='montep',
+                          token='B2FEDDA8329AC425C8ADE97C312FF4EA',
+                          secret='9jptoxzstVx8zSNkzVuohiNOEwGss8PGxyJsOMAn')
+
+library(rsconnect)
+rsconnect::deployApp('path/to/your/app')
+
 
 data2       <- read.csv("data_last2.csv")
 
@@ -17,16 +24,28 @@ data2$popup  <- as.character(paste("Avg outcoming trip: <strong>", data2$from_av
 
 #Define page
 ui <- fluidPage(
-  h1("Outgoing vs Ingoing Publibike-trips by station"),
+  
+  tags$head(
+    tags$style(HTML("
+                    
+                    h1 {
+                    font-weight: 200;
+                    text-align: center;
+                    color: #48ca3b;
+                    }
+                    
+                    "))
+    ),
+  
   sidebarLayout(position = "left",
-    mainPanel(
+    mainPanel(h1("pidsesello")),
       fluidRow(
         splitLayout(
-          cellWidths = c("50%", "50%"),leafletOutput(outputId = "mymap",height=640, width = 480),leafletOutput(outputId = "mymap2",height=640, width = 480)))),
+          cellWidths = c("50%", "50%"),leafletOutput(outputId = "mymap",height=600, width = 600),leafletOutput(outputId = "mymap2",height=600, width = 600)))),
     sidebarPanel(
-      h1("Hour of the day"),
-      sliderInput(inputId = "hour", label = "Hour of the day:", min = 0,max = 23, step = 1, value = 1,width = "70%"))
-  ))
+      h1("Student grades"),
+      sliderInput(inputId = "hour", label = "Hour of the day:", min = 0,max = 23, step = 1, value = 1))
+  )
 
 server <- function(input, output) { 
   draw = FALSE
@@ -34,29 +53,24 @@ server <- function(input, output) {
 
   #Define palette
   pal <- colorNumeric( palette = colour_list, domain = data2$from_freq)
-  
   #Plot the map without any circle
   output$mymap <- renderLeaflet({
     leaflet(data2) %>% 
       setView(lng = 8.9565244, lat = 46.0052856, zoom = 15)  %>% #Set swizzera
-      addTiles()})
+      addTiles() })
   output$mymap2 <- renderLeaflet({
     leaflet(data2) %>% 
-      setView(lng = 8.9565244, lat = 46.0052856, zoom = 15)  %>%
+      setView(lng = 8.9565244, lat = 46.0052856, zoom = 15)  %>% #Set swizzera
       addTiles() })
   
-    #Some interactivity!
+  #Some interactivity!
   observe({
     data_hour   <- subset(data2, hour == input$hour)
     leafletProxy("mymap", data = data_hour) %>%
-      clearShapes()  %>% clearControls() %>%
+      clearShapes()  %>%
       addCircles(data = data_hour, lat = ~ lat, lng = ~ lon, weight = 4, color = "black",
                 radius = 10*(data_hour$from_count)^0.5, fillOpacity = 0.7, fillColor = ~pal(from_freq),
-                label = ~label, popup = ~popup) %>%
-      addLegend("bottomleft", pal = pal, values = data2$from_freq, title = "Relative usage")
-    
-    
-    })
+                label = ~label, popup = ~popup)})
   observe({
     data_hour   <- subset(data2, hour == input$hour)
     leafletProxy("mymap2", data = data_hour) %>%
