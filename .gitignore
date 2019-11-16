@@ -1,4 +1,12 @@
-
+datasets/ail/
+datasets/city_of_lugano/
+datasets/h_benchmark
+datasets/meteo_suisse/
+datasets/publibike/
+datasets/societa_navigazione_lugano/
+datasets/swisscom_csv/
+datasets/tpl/
+datasets/ufam
 # Created by https://www.gitignore.io/api/git,macos,python,pycharm,windows,intellij,visualstudio,jupyternotebooks,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=git,macos,python,pycharm,windows,intellij,visualstudio,jupyternotebooks,visualstudiocode
 
@@ -696,3 +704,4 @@ healthchecksdb
 MigrationBackup/
 
 # End of https://www.gitignore.io/api/git,macos,python,pycharm,windows,intellij,visualstudio,jupyternotebooks,visualstudiocode
+.Rproj.user
