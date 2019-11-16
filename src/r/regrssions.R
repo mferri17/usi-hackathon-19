@@ -5,6 +5,7 @@ library(tibble)
 library(dplyr)
 library(lubridate)
 library(stringr)
+library(stargazer)
 
 # Regression 1
 
@@ -53,11 +54,12 @@ df %>%
 
 
 # Regression 4 - control dummies
+dff <- df
 df <- dff
 
 split_day <- function(x){
   if (length(x) > 1) return(sapply(x, split_day))
-  out <- if (x > 20) 'E' else if (x < 6) 'N' else 'D'
+  out <- if (x > 20 | x == 5 | x == 0) 'E' else if (x < 5 & x > 0) 'N' else 'D'
   return(out)
 }
 
@@ -77,9 +79,9 @@ df <- df %>%
                wday_dummy_gen())
 
 ## Factor Encoding 
-#  D - day (6-19)
-#  E - evening (21-23)
-#  N - night (0-5)
+#  D - day (6-20)
+#  E - evening and early morning (21-24 + 5) -> low density
+#  N - night (1-4) 
 
 
 dummyfy <- function(x){
@@ -96,5 +98,24 @@ df <- df %>%
 lm(rides ~ commutes + D + E + weekend, df) %>%
   summary()
 
-lm(rides ~ commutes + low_transport + weekend, df %>% mutate(low_transport = D+E)) %>%
+lm(rides ~ commutes + low_transport + weekend, 
+   df %>% mutate(low_transport = D+E)) %>%
   summary()
+
+
+# Regrssions on paper
+
+# (1) 
+lm(rides ~ commutes, filter(df, !weekend)) %>% 
+  stargazer(out = 'reg1.tex')
+
+reg2 <- lm(rides ~ commutes, filter(df, !weekend, D))
+reg3 <- lm(rides ~ commutes, filter(df, !weekend, E))
+reg4 <- lm(rides ~ commutes, filter(df, !weekend, N))
+stargazer(reg2,reg3,reg4, out = 'multireg.tex')
+
+rm(d,dfd,dff,dfp,reg2,reg3,reg4,s)
+
+
+# Regressions with tpl
+tpl <- read_csv('datasets/tpl_density.csv')
