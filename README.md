@@ -7,4 +7,10 @@
 - Riccardo Giordano
 - Hao Ma
 - Giovanni Kraushaar
-- Cagge
+- Simone Caggese
+
+## Used dataset
+
+- PubliBike
+- TPL
+- SwissCome
