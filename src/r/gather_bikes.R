@@ -8,18 +8,18 @@ library(lubridate)
 
 d <- read.csv('datasets/bikes.csv') %>%
   drop_na(to) %>%
-  mutate(from = as.factor(to), to = as.factor(to), hour = as.factor(hour)) %>%
+  mutate(from = as.factor(from), to = as.factor(to), 
+         hour = as.factor(hour)) %>%
   mutate(date = ymd(date))
 
 gather_bike <- function(d, start, end){
   d <- d %>%
     filter(date >= ymd(start), date <= ymd(end))
   
-  stations <- read_csv('datasets/publibike/stations.csv') %>%
-    select('name', 'longitude', 'latitude')
-  
   counting <- function(hour, station, distance, prefix){
     # prefix either 'from' or 'to'
+    
+    
     
     t <- table(hour, station)
     h <- attr(t,'dimnames')[[1]]  # hour
@@ -49,7 +49,8 @@ gather_bike <- function(d, start, end){
       bind_rows()
     df <- left_join(df, x, by = 'hour')
     rm(x)
-    df[paste(prefix,'freq_rel',sep = '_')] <- df[[count_name]] / df$tot
+    # Relative frequency
+    df[paste(prefix,'freq',sep = '_')] <- df[[count_name]] / df$tot
     
     avg_dist <- tapply(distance, list(hour,station), mean) %>% 
       as.data.frame() %>%
@@ -64,50 +65,16 @@ gather_bike <- function(d, start, end){
     return(df)
   }
   
-  dfrom <- counting(d$hour, d$from, 'from')
-  # FROM
+  dfrom <- counting(d$hour, d$from, d$distance, 'from')
+  dto <- counting(d$hour, d$to, d$distance, 'to')
   
+  stations <- read_csv('datasets/publibike/stations.csv') %>%
+    select('name', 'longitude', 'latitude')
   
-  dfrom <- 
+  df <- full_join(dfrom, dto, by = c('station', 'hour')) %>%
+    left_join(stations, by = c('station' = 'name'))
   
-  
-  
-  
-  
-  
-  
-  # TO
-  t <- table(d$hour,d$to)
-  hour <- attr(t,'dimnames')[[1]]
-  to <- attr(t,'dimnames')[[2]]
-  dto <- lapply(to, function(x) tibble(
-    to = rep(x,length(hour)), 
-    hour = hour)) %>% 
-    bind_rows()
-  
-  t <- as.numeric(t) %>% tibble()
-  colnames(t) <- 'to_count'
-  dto <- bind_cols(dto, t)
-  rm(hour,to,t)
-  
-  x <- dto %>% group_by(hour) %>% summarise(tot = sum(to_count))
-  dto <- inner_join(dto, x, by = 'hour') %>%
-    mutate(to_freq_rel = to_count / tot)
-  rm(x)
-  
-  avg_dist <- tapply(d$distance, list(d$hour,d$to), mean) %>% 
-    as.data.frame() %>%
-    rownames_to_column('hour') %>%
-    gather(-matches('hour'), key = 'to', value = 'to_avg_dist')
-  
-  dto <- inner_join(dto, avg_dist, by = c('hour','to')) %>%
-    select(-'tot')
-  
-  out <- inner_join(dfrom, dto, by = c('from' = 'to', 'hour')) %>%
-    left_join(stations, by = c('from' = 'name')) %>%
-    rename(station = from)
-  
-  return(out)
+  return(df)
 }
 
 
@@ -143,7 +110,12 @@ dfd <- d %>%
   add_column( DOW = 'D', period = 'F')
 
 df <- bind_rows(dsa, dsw, dsd, dfa, dfw, dfd) %>%
-  drop_na(from_avg_dist, to_avg_dist)
+  drop_na(from_avg_dist, to_avg_dist) %>%
+  rename(
+    from_avgDistance = from_avg_dist, 
+    to_avgDistance = to_avg_dist,
+    lon = longitude,
+    lat = latitude)
 
 write_csv(
   df,
