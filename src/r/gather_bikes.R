@@ -79,12 +79,43 @@ gather_bike <- function(d, start, end){
   return(out)
 }
 
-write_csv(
-  gather_bike(d,'2019-07-20','2019-08-19'),
-  path = 'datasets/gather_bike_summer.csv'
-)
+df <- filter(d, day == 'Sat' | day == 'Sun')
+
+# DOW Day of the Week encoding
+#  A = all
+#  W = weekend
+#  D = workday
+
+# Period encoding
+#  S = summer
+#  F = fall
+
+dsa <- gather_bike(d,'2019-07-20','2019-08-19') %>% 
+  add_column( DOW = 'A', period = 'S')
+dsw <- d %>%
+  filter(day == 'Sat' | day == 'Sun') %>%
+  gather_bike('2019-07-20','2019-08-19') %>% 
+  add_column( DOW = 'W', period = 'S')
+dsd <- d %>%
+  filter(day != 'Sat' | day != 'Sun') %>%
+  gather_bike('2019-07-20','2019-08-19') %>% 
+  add_column( DOW = 'D', period = 'S')
+
+dfa <- gather_bike(d,'2019-09-16','2019-10-15') %>% 
+  add_column( DOW = 'A', period = 'F')
+dfw <- d %>%
+  filter(day == 'Sat' | day == 'Sun') %>%
+  gather_bike('2019-09-16','2019-10-15') %>% 
+  add_column( DOW = 'W', period = 'F')
+dfd <- d %>%
+  filter(day != 'Sat' | day != 'Sun') %>%
+  gather_bike('2019-09-16','2019-10-15') %>% 
+  add_column( DOW = 'D', period = 'F')
+
+df <- bind_rows(dsa, dsw, dsd, dfa, dfw, dfd) %>%
+  drop_na(from_avg_dist, to_avg_dist)
 
 write_csv(
-  gather_bike(d,'2019-09-16','2019-10-15'),
-  path = 'datasets/gather_bike_autumn.csv'
+  df,
+  path = 'datasets/gather_bike.csv'
 )

@@ -6,6 +6,7 @@ library(dplyr)
 library(lubridate)
 library(stringr)
 library(stargazer)
+library(tidyr)
 
 # Regression 1
 
@@ -119,3 +120,16 @@ rm(d,dfd,dff,dfp,reg2,reg3,reg4,s)
 
 # Regressions with tpl
 tpl <- read_csv('datasets/tpl_density.csv')
+d <- df %>% 
+  mutate(time = ymd_h(time)) %>%
+  left_join(tpl, by = c('time' = 'dh')) %>%
+  rename(buses = count) %>%
+  replace_na(list(buses = 0))
+
+reg_tpl <- lm(rides ~ commutes + buses, filter(d, !weekend))
+summary(reg_tpl)
+
+reg_tpl2 <- lm(rides ~ commutes + buses, filter(d, !weekend, D))
+reg_tpl3 <- lm(rides ~ commutes + buses, filter(d, !weekend, E))
+
+stargazer(reg_tpl, reg_tpl2, reg_tpl3, out = 'reg_tpl.tex')
