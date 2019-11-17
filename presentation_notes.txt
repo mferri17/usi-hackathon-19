@@ -1,0 +1,19 @@
+
+1 --- FRONT SLIDE
+    Title
+    Team
+    USI Hackathon
+
+2 --- DOMAIN/PROBLEM/GOAL/CONTEXT ??? (1 or 2 slides)       / 30 seconds
+    PubliBike
+    Swisscom (for commuters)
+    TPL (for buses)
+
+3 --- DEMO 1                                                / 60 seconds
+    Explain the meaning of what we see
+    Highlight difference in out/ingoing trips through time
+    Logistic purposes
+
+4 --- DEMO 2                                                / 60 seconds
+    Explain the meaning of what we see
+    Marketing purposes
