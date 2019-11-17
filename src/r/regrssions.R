@@ -7,6 +7,7 @@ library(lubridate)
 library(stringr)
 library(stargazer)
 library(tidyr)
+library(ggplot2)
 
 # Regression 1
 
@@ -133,3 +134,91 @@ reg_tpl2 <- lm(rides ~ commutes + buses, filter(d, !weekend, D))
 reg_tpl3 <- lm(rides ~ commutes + buses, filter(d, !weekend, E))
 
 stargazer(reg_tpl, reg_tpl2, reg_tpl3, out = 'reg_tpl.tex')
+
+rm(reg_tpl,reg_tpl2,reg_tpl3,df,tpl)
+
+
+# IV Regression
+
+IV_data <- filter(d, !weekend, D)
+
+IV_rides <- lm(  # dependent variable (y)
+  rides ~ buses,
+  data = IV_data
+)
+
+IV_commutes <-  lm(  # independent variable (x)
+  commutes ~ buses,
+  data = IV_data
+)
+
+residuals_y <- IV_rides$residuals
+residuals_x <- IV_commutes$residuals
+
+residual_data <- IV_data %>%
+  add_column(residuals_y = residuals_y, residuals_x = residuals_x)
+
+reg_res_static <- lm(
+  residuals_y ~ residuals_x,
+  data = residual_data
+)
+summary(reg_res_static)
+
+# --
+
+IV_fn <- function(d){
+  res_y <- lm(rides ~ buses, d)$residuals
+  res_x <- lm(commutes ~ buses, d)$residuals
+  
+  d <- add_column(d, res_y, res_x)
+  r <- lm(res_y ~ res_x, d)
+  s <- summary(r)
+  l <- list(
+    b_0 = r$coefficients[1],
+    b_1 = r$coefficients[2],
+    se_0 = s$coefficients[1,2],
+    se_1 = s$coefficients[2,2],
+    p_0 = s$coefficients[1,4],
+    p_1 = s$coefficients[2,4],
+    R_2 = s$r.squared
+  )
+  return(l)
+}
+
+weeks <- unique(week(IV_data$time))
+x <- lapply(weeks, function(w){
+  d <- filter(IV_data, week(time) == w)
+  c(week = w, IV_fn(d)) 
+}) %>% bind_rows()
+
+ggplot(x, aes(week, b_1)) + geom_point()
+ggsave('weekly_IV_reg.pdf', device = 'pdf')
+
+
+weeks_1 <- weeks[weeks < quantile(weeks, .5)]
+weeks_2 <- weeks[weeks > quantile(weeks, .5)]
+
+wl <- list(weeks_1, weeks_2)
+x <- lapply(wl, function(w){
+  d <- filter(IV_data, week(time) %in% w)
+  IV_fn(d)
+}) %>% bind_rows() %>%
+  add_column(week_split = c('early', 'late'))
+
+# ---
+
+IV_fn_table <- function(d){
+  res_y <- lm(rides ~ buses, d)$residuals
+  res_x <- lm(commutes ~ buses, d)$residuals
+  
+  d <- add_column(d, res_y, res_x)
+  r <- lm(res_y ~ res_x, d)
+  return(r)
+}
+
+x <- lapply(wl, function(w){
+  d <- filter(IV_data, week(time) %in% w)
+  IV_fn_table(d)
+})
+
+stargazer(x[[1]], x[[2]], out = 'IV_reg_summer.tex')
