@@ -11,9 +11,8 @@ library(ggplot2)
 
 # Regression 1
 
-d <- read_csv('datasets/bikes.csv') %>% 
-  # select(matches('date'), matches('hour')) %>%
-  mutate(time = paste(.$date, .$hour, sep = '_'))
+d <- read_csv('datasets/bikes_with_na.csv') %>% 
+  mutate(., time = paste(.$date, .$hour, sep = '_'))
 
 s <- read_csv('datasets/swisscom_csv/tripcount_hourly_withinarea.csv') %>%
   mutate(date = ymd_hms(.$Date)) %>%
