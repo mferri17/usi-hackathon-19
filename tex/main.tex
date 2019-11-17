@@ -2,38 +2,36 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\title{Final Products for Hackathon}
+\usepackage[left=2cm,right=2cm]{geometry}
+\usepackage{float}
+\title{Analysis Report on Publibike Dataset}
 %\author{howard.hao.ma }
 %\date{November 2019}
 
 \begin{document}
 
 \maketitle
-
-\section{Visualization for Publibike Dataset}
-\subsection{Interactive visualization of number of rides per station at different hours in one day}
-\begin{enumerate}
-    \item The average number of rides per station of all dates (1 graph)
-    \item The average number of rides per station of weekdays vs. weekends (2 graphs)
-    \item The average number of rides per station of each day during a week (7 graphs)
-\end{enumerate}
-
-\subsection{Publibike vs. Swisscom Commuters}
-\textbf{Data description:} 
+\newpage
+\section{Data Description:} 
+We merged the following data:
 \begin{itemize}
-    \item Publibike: hourly data of number of rides; 
-    \item Swisscom Data:hourly data of number of commuters
+    \item Publibike: total number of Publibike rides by hour
+    \item Swisscom: total number of Swisscom commuters in Lugano by hour
+    \item TPL: total number of total running buses by hour
 \end{itemize}
-\subsubsection{Percentage of Publibike users among commuters}
+\newpage
+
+\section{Substitution Effect btw Buses and Publibikes }
+\subsection{All Sample}
 \begin{align}
-    y_i I_{-W} = \beta_1 + \beta_2 x_i I_{-W} + \varepsilon_i, \label{model1}
+    y_i  = \beta_1 + \beta_2 x_i + \varepsilon_i, \label{model1}
 \end{align}
 where $y_i$ represents the number of rides per hour, and $x_i$ represents the number of Swisscom commuters per hour.\\
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
 % Date and time: Sat, Nov 16, 2019 - 23:03:52
-\begin{table}[!htbp] \centering 
-  \caption{Model (\ref{model1})} 
+\begin{table}[H]\centering 
+  \caption{All sample} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}}lc} 
 \\[-1.8ex]\hline 
@@ -59,31 +57,33 @@ F Statistic & 59.793$^{***}$ (df = 1; 766) \\
 \end{tabular} 
 \end{table} 
 
-\begin{figure}
+\subsection{By bus coverage}
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{tpl_density.pdf}
-    \caption{Histogram of number of Publibike rides by hour}
+    \caption{Histogram of number of running buses by hour}
     \label{fig:my_label}
 \end{figure}
 
-
-\subsubsection{Substitution effect by buses}
 \begin{align}
-    y_i I_{-W} I_D = \beta_1 + \beta_2 x_i I_{-W} I_D + \varepsilon_i \label{model2} \\
-    y_i I_{-W} I_E = \beta_1 + \beta_2 x_i I_{-W} I_E + \varepsilon_i \label{model3}\\
-    y_i I_{-W} I_N = \beta_1 + \beta_2 x_i I_{-W} I_N + \varepsilon_i \label{model4}
+    y_i(S)  = \beta_1 + \beta_2 x_i (S) I_D + \varepsilon_i 
 \end{align}
-where $I_D = 1$ represents day time $[6,19]$ when there are enough buses, $I_E = 1$ represents evening time $[20,23]$ when there are only a few buses and $I_N = 1$ represents night time $[0,5]$ when there is no bus.
+where $S = D, E, N$. 
+\begin{itemize}
+    \item $D:$ day time 6am-8pm, enough buses on the road
+    \item $E:$ evening time 9pm-0am and 5am, a few buses on the road
+    \item $N:$ night time 1am-4am, no buses on the road
+\end{itemize}
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
 % Date and time: Sat, Nov 16, 2019 - 23:03:53
-\begin{table}[!htbp] \centering 
-  \caption{Model (\ref{model2})-(\ref{model4})} 
+\begin{table}[H] \centering 
+  \caption{Subsititution effect by bus coverage} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}}lccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{3}{c}{\textit{Dependent variable:} \# rides per hour}\\ 
+ & \multicolumn{3}{c}{\textit{Dependent variable:} \# Publibike rides per hour}\\ 
 \cline{2-4} 
 \\[-1.8ex] & 6am - 8pm & 9pm - 0am and 5am & 1am - 4am\\ 
 \hline \\[-1.8ex] 
@@ -105,44 +105,66 @@ F Statistic & 11.759$^{***}$ (df = 1; 519) & 46.293$^{***}$ (df = 1; 172) & 6.90
 \end{tabular} 
 \end{table} 
 
-\subsubsection{Control for number of buses on the road}
+\subsection{Conclusions and suggestions}
+\begin{enumerate}
+    \item A lower ratio of commuters will use Publibikes when there are more buses available
+    \item From 9pm to 4am, around 10\% of commuters use Publibikes, which is way higher than day time, 0.3\%
+    \item During the evening time, the R square of the model reaches 21.2\%, which means 20\% of the changes in demands for Publibikes are driven by commuters.
+    \item Publibike company should consider pushing ads designed for commuters  during evening time. (Precise marketing)
+\end{enumerate}
+
+\newpage
+
+\section{User Type Impact on the Usage of Publibike}
+\textbf{Causality Issue: } Both the usage of Publibikes and buses will be driven by the commuting demands during peak hours. We need to control for that by gathering the residuals first:
 \begin{align}
-    y_i I_{-W} = \beta_1 + \beta_2 x_i I_{-W} + \beta_3 z_i I_{-W} + \varepsilon_i,
+    e_i^y = y_i - \hat{\beta}_1 + \hat{\beta}_2 z_i\\
+    e_i^x = x_i - \hat{\gamma}_1 + \hat{\gamma}_2 z_i
 \end{align}
-where $z_i$ is the number of buses that are on the road.
+where $z_i$ is the number of buses that are on the road. Then we run the following regression:
+\begin{align}
+    e_i^y(T) = \theta_0 + \theta_1 e_i^x(T) + \varepsilon_i,
+\end{align}
+where $T =$ 'summer' or 'not summer'.
+
 
 % Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Sat, Nov 16, 2019 - 23:32:19
+% Date and time: Sun, Nov 17, 2019 - 10:46:58
 \begin{table}[!htbp] \centering 
   \caption{} 
   \label{} 
-\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\begin{tabular}{@{\extracolsep{5pt}}lcc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-4} 
-\\[-1.8ex] & \multicolumn{3}{c}{rides} \\ 
-\\[-1.8ex] & (1) & (2) & (3)\\ 
+ & \multicolumn{2}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-3} 
+\\[-1.8ex] & \multicolumn{2}{c}{Residuals of (\# number of Publibike rides)} \\ 
+\\[-1.8ex] & Before summer holiday & Summer holiday\\ 
 \hline \\[-1.8ex] 
- commutes & $-$0.0004 & 0.001 & 0.077$^{***}$ \\ 
-  & (0.001) & (0.001) & (0.020) \\ 
-  & & & \\ 
- buses & 0.401$^{***}$ & 0.266$^{**}$ & 0.489 \\ 
-  & (0.068) & (0.114) & (0.742) \\ 
-  & & & \\ 
- Constant & 18.431$^{***}$ & 20.116$^{***}$ & 3.807 \\ 
-  & (1.435) & (3.977) & (6.764) \\ 
-  & & & \\ 
+ Residuals of \\
+ (\# number of Swisscom commuters) & 0.003$^{**}$ & 0.0005 \\ 
+  & (0.001) & (0.002) \\ 
+  & & \\ 
+ Constant & $-$0.000 & $-$0.000 \\ 
+  & (0.923) & (1.062) \\ 
+  & & \\ 
 \hline \\[-1.8ex] 
-Observations & 768 & 521 & 174 \\ 
-R$^{2}$ & 0.112 & 0.032 & 0.214 \\ 
-Adjusted R$^{2}$ & 0.110 & 0.029 & 0.205 \\ 
-Residual Std. Error & 18.437 (df = 765) & 16.523 (df = 518) & 21.556 (df = 171) \\ 
-F Statistic & 48.327$^{***}$ (df = 2; 765) & 8.680$^{***}$ (df = 2; 518) & 23.288$^{***}$ (df = 2; 171) \\ 
+Observations & 237 & 284 \\ 
+R$^{2}$ & 0.028 & 0.0003 \\ 
+Adjusted R$^{2}$ & 0.024 & $-$0.003 \\ 
+Residual Std. Error & 14.216 (df = 235) & 17.890 (df = 282) \\ 
+F Statistic & 6.711$^{**}$ (df = 1; 235) & 0.094 (df = 1; 282) \\ 
 \hline 
 \hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table} 
+
+\subsection{Conclusions and suggestions}
+\begin{enumerate}
+    \item Students are the major users of Publibikes
+    \item Employees don't ride Publibikes more often even if there are more bikes available during the summer holiday.
+    \item To promote sustainability, employers should encourage employees use Publibikes more often especially during the summer holiday.
+\end{enumerate}
 
 \end{document}

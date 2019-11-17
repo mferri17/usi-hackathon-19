@@ -73,10 +73,13 @@ rm(station)
 
 # ---- Merge everthing
 
-d <- inner_join(d, trips, by = 'id')
+d_no_na <- inner_join(d, trips, by = 'id')
+d__wt_na <- left_join(d, trips, by = 'id') %>%
+  select(-'Ende')
 rm(trips)
 
 # ---- Save csv
 
-write_csv(d, 'datasets/bikes.csv')
+write_csv(d_no_na, 'datasets/bikes.csv')
+write_csv(d__wt_na, 'datasets/bikes_with_na.csv')
 

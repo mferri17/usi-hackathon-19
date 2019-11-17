@@ -5,6 +5,7 @@ library(readr)
 library(lubridate)
 library(fs)
 library(ggplot2)
+library(ggthemes)
 
 files <- fs::dir_ls('datasets/tpl/lines_events/')
 
@@ -31,6 +32,7 @@ g <- d %>%
   group_by(hour) %>%
   summarise(avg = mean(count))
 
-ggplot(g, aes(hour,avg)) + geom_col()
 
-ggsave('tpl_density.pdf', device = 'pdf')
+ggplot(g, aes(hour,avg)) + theme_wsj() + geom_col()
+
+ggsave('tpl_density.pdf', device = 'pdf', width = 15, height = 6)
