@@ -8,20 +8,18 @@ library(leaflet.extras)
 data       <- read.csv("gather_bike.csv")
 
 #Define intensity and size
-data$size   <- abs(rnorm(length(data$hour),30,30))
 data$from_avgDistance <- round(data$from_avgDistance,0)
 data$to_avgDistance <- round(data$to_avgDistance,0)
 data$label  <- paste0('<strong>', data$station, '</strong> <br>',"Rides starting from here:" ,data$from_count) %>% lapply(htmltools::HTML)
 data$popup  <- as.character(paste("Avg outcoming trip: <strong>", data$from_avgDistance,"</strong> Meters", "<br>","Avg incoming trip:  <strong> " ,data$to_avgDistance,"</strong> Meters <br>"))
 
-data$to_count = data$to_count+80
 data2 <- data
 # data2  <- subset(data, DoW=="A")
 # data2 <- subset(data, period=="F")
 
 #Define page
 ui <- fluidPage(
-  h1("Outgoing vs Ingoing Publibike-trips by station"),
+  h1("Behaviour of outgoing vs ingoing Publibike-trips by station"),
   sidebarLayout(position = "left",
                 mainPanel(
                   fluidRow(
