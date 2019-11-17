@@ -28,6 +28,7 @@ ui <- fluidPage(
                     splitLayout(
                       cellWidths = c("50%", "50%"),leafletOutput(outputId = "mymap",height=640, width = 480),leafletOutput(outputId = "mymap2",height=640, width = 480)))),
                 sidebarPanel(width = 4,
+                             h3("Filters"),
                              selectInput(inputId = "period", 
                                          label = "Season",
                                          choices = c("Summer","Fall"), 
@@ -36,7 +37,6 @@ ui <- fluidPage(
                                          label = "Days of Week",
                                          choices = c("All","Working Days","Weekends"), 
                                          selected = "All"),
-                             h1("Hour of the day"),
                              sliderInput(inputId = "hour", label = "Hour of the day:", min = 0,max = 23, step = 1, value = 7,width = "90%"))
   ))
 
