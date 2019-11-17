@@ -1,3 +1,7 @@
+'''
+	Calculates distances between coordinates of two stations and save them into a CSV file
+'''
+
 from sys import argv
 import pandas as pd
 from math import sin, cos, sqrt, atan2, radians

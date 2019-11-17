@@ -1,7 +1,5 @@
 # giovanni.kraushaar@usi.ch
 
-homewd <- getwd()
-
 library(readr)
 library(tibble)
 library(dplyr)
@@ -18,33 +16,37 @@ d <- read_csv('datasets/publibike/rides_by_day.csv') %>%
     minute = minute(Ende),
     day = wday(Ende, label = TRUE)
     ) %>%
-  mutate(time = hms::round_hms(time, 600))  # round at 10 minutes
+  mutate(time = hms::round_hms(time, 600)) %>%  # round at 10 minutes
+  rename(id = 'Fahrt: Name')
 
 # ----- Merge Meteo
 
-meteo <- read_csv('datasets/meteo_suisse/Dati-meteo_Lugano.csv') %>%
-  mutate(
-    Data = dmy(Data),
-    Ora = hms::as_hms(Ora)
-    ) %>%
-  select(-matches('Data e ora'))
-
-d <- left_join(d, meteo, by = c("date" = "Data", "time" = "Ora")) %>%
-  rename(id = 'Fahrt: Name')
-
-rm(meteo)
+# meteo <- read_csv('datasets/meteo_suisse/Dati-meteo_Lugano.csv') %>%
+#   mutate(
+#     Data = dmy(Data),
+#     Ora = hms::as_hms(Ora)
+#     ) %>%
+#   select(-matches('Data e ora'))
+# 
+# d <- left_join(d, meteo, by = c("date" = "Data", "time" = "Ora")) %>%
+#   rename(id = 'Fahrt: Name')
+# 
+# rm(meteo)
 
 # ----- Merge Stations
 
 loans <- read_csv('datasets/publibike/station_number_of_loans.csv') %>%
   rename(id = 'Fahrt: Name', from = "Station - VON") %>%
   distinct() %>% # remove duplicate rows
-  mutate(from = str_replace(.$from, 'Piazza Mercato/Contrada di Verla', 'Contrada di Verla'))
+  mutate(from = str_replace(.$from, 
+                            'Piazza Mercato/Contrada di Verla', 
+                            'Contrada di Verla'))
 
 returns <- read_csv('datasets/publibike/station_number_of_returns.csv') %>%
   rename(id = "Fahrt: Name", to = "Station - BIS") %>%
   distinct() %>%  # some ids were repeated
-  mutate(to = str_replace(.$to, 'Piazza Mercato/Contrada di Verla', 'Contrada di Verla'))
+  mutate(to = str_replace(.$to, 'Piazza Mercato/Contrada di Verla', 
+                          'Contrada di Verla'))
 
 trips <- inner_join(loans, returns, by = 'id') 
 rm(loans, returns)
@@ -71,7 +73,8 @@ rm(station)
 
 # ---- Merge everthing
 
-d <- left_join(d, trips, by = 'id')
+d <- inner_join(d, trips, by = 'id')
+rm(trips)
 
 # ---- Save csv
 
